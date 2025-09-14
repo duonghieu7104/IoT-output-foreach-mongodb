@@ -18,8 +18,7 @@ def stream_data():
                 with open(FILE_PATH, "r") as f:
                     lines = f.readlines()
                 
-                # Gửi 100 dòng trong 2 giây
-                interval = 2 / len(lines)  # khoảng thời gian giữa mỗi dòng
+                interval = 2 / len(lines)
                 for line in lines:
                     conn.sendall(line.encode("utf-8"))
                     time.sleep(interval)

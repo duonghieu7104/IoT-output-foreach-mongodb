@@ -61,7 +61,7 @@ def process_rdd(rdd):
 
             # record alert nếu vượt ngưỡng
             alert_record = None
-            if analog > 60:  # điều kiện cảnh báo nguy hiểm
+            if analog > 60:
                 alert_record = {
                     "sensor": sensor_id,
                     "digital": digital,
@@ -90,7 +90,7 @@ def process_rdd(rdd):
 if __name__ == "__main__":
     sc = SparkContext("local[2]", "IoTStreamApp")
     sc.setLogLevel("ERROR")
-    ssc = StreamingContext(sc, 2)  # batch interval = 2s (khớp tần suất gửi log)
+    ssc = StreamingContext(sc, 2)
 
     # Nhận dữ liệu từ socket
     lines = ssc.socketTextStream("localhost", 9998)

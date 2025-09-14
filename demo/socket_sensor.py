@@ -14,7 +14,7 @@ def stream_data(file_path):
                 with open(file_path, "r") as f:
                     for line in f:
                         conn.sendall(line.encode("utf-8"))
-                        time.sleep(2)  # gửi mỗi 2 giây
+                        time.sleep(2)
             print("⚠️ Client disconnected, waiting for new connection...")
 
 if __name__ == "__main__":
