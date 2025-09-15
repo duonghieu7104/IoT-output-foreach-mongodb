@@ -10,20 +10,40 @@ COL_LOGS = "100_gas_sensor_logs"
 COL_ALERTS = "100_gas_sensor_alerts"
 COL_AVG = "100_gas_sensor_avg"
 
+# ANSI colors
+BLUE = "\033[36m"    
+GREEN = "\033[32m"   
+YELLOW = "\033[33m" 
+RED = "\033[31m"   
+RESET = "\033[0m"
+
 def save_partition(iterable, collection_name, db_name=DB_NAME):
     client = MongoClient(MONGO_URI)
     db = client[db_name]
     collection = db[collection_name]
     buffer = list(iterable)
+
+    # chọn màu theo collection
+    color = RESET
+    if collection_name == COL_LOGS:
+        color = GREEN
+    elif collection_name == COL_ALERTS:
+        color = RED
+    elif collection_name == COL_AVG:
+        color = BLUE
+
     if buffer:
         for doc in buffer:
             collection.replace_one({"_id": doc["_id"]}, doc, upsert=True)
-        print(f"✅ Upserted {len(buffer)} → {collection_name}")
+        print(f"{color}Upserted {len(buffer)} → {collection_name}{RESET}")
+    else:
+        print(f"{YELLOW}Empty partition, nothing to save for {collection_name}{RESET}")
+
     client.close()
 
 def process_rdd(rdd):
     if rdd.isEmpty():
-        print("⚠️ Empty RDD batch")
+        print(f"{YELLOW}Empty RDD batch{RESET}")
         return
 
     def parse_line(line):
@@ -55,7 +75,8 @@ def process_rdd(rdd):
                 }
 
             return log_record, alert_record
-        except:
+        except Exception as e:
+            print(f"{YELLOW}Skipping line due to parse error: {line} | {e}{RESET}")
             return None, None
 
     parsed = rdd.map(parse_line).filter(lambda x: x is not None)
@@ -68,10 +89,11 @@ def process_rdd(rdd):
 # Main Spark Streaming
 if __name__ == "__main__":
     sc = SparkContext("local[2]", "IoTStreamApp")
+    sc.setLogLevel("OFF")
     ssc = StreamingContext(sc, 2)
     ssc.checkpoint("./checkpoint_100_sensors")
 
-    lines = ssc.socketTextStream("localhost", 9999)
+    lines = ssc.socketTextStream("localhost", 9998)
 
     # Logs + alerts
     lines.foreachRDD(process_rdd)
@@ -102,6 +124,6 @@ if __name__ == "__main__":
     })
     avg_records.foreachRDD(lambda rdd: rdd.foreachPartition(lambda it: save_partition(it, COL_AVG)))
 
-    print("📡 Spark Streaming started for 100 sensors on localhost:9998")
+    print(f"{BLUE}Spark Streaming started for 100 sensors on localhost:9999{RESET}")
     ssc.start()
     ssc.awaitTermination()

@@ -1,7 +1,7 @@
 from pyspark import SparkContext
 from pyspark.streaming import StreamingContext
 from pymongo import MongoClient
-import os
+import os, atexit
 from datetime import datetime
 
 # ========================
@@ -16,35 +16,52 @@ COL_ALERTS = "0_gas_sensor_alerts"
 # ANSI Colors
 # ========================
 BLUE = "\033[36m"   
-GREEN = "\033[32m"   
-YELLOW = "\033[33m" 
-RED = "\033[31m"    
+GREEN = "\033[32m"  
+PINK = "\033[95m"   
+YELLOW = "\033[33m"  
+RED = "\033[31m"
 RESET = "\033[0m"
+
+# ========================
+# Global Mongo Client (per worker)
+# ========================
+_mongo_client = None
+
+def get_mongo_client():
+    """
+    Singleton MongoClient trên mỗi worker node.
+    Pymongo tự quản lý connection pool bên trong.
+    """
+    global _mongo_client
+    if _mongo_client is None:
+        _mongo_client = MongoClient(MONGO_URI, maxPoolSize=50)
+        print(f"{BLUE}MongoClient initialized with pool (max 50){RESET}")
+        # Đảm bảo cleanup khi worker shutdown
+        atexit.register(lambda: _mongo_client.close())
+    return _mongo_client
 
 
 def save_partition(iterable, collection_name, db_name=DB_NAME):
     """
-    Lưu records trong mỗi partition vào MongoDB
-    (đúng cách: kết nối được tạo bên trong worker).
+    Lưu records trong mỗi partition vào MongoDB,
+    tái sử dụng connection pool thay vì mở/đóng liên tục.
     """
-    client = MongoClient(MONGO_URI)
+    client = get_mongo_client()
     db = client[db_name]
     collection = db[collection_name]
 
     buffer = list(iterable)
     if buffer:
         collection.insert_many(buffer)
-        print(f"{GREEN}Saved {len(buffer)} records to {db_name}.{collection_name}{RESET}")
+        if collection_name == COL_LOGS:
+            print(f"{GREEN}Saved {len(buffer)} records to {db_name}.{collection_name}{RESET}")
+        elif collection_name == COL_ALERTS:
+            print(f"{PINK}Saved {len(buffer)} records to {db_name}.{collection_name}{RESET}")
     else:
         print(f"{YELLOW}Empty partition, nothing to save for {collection_name}.{RESET}")
 
-    client.close()
-
 
 def process_rdd(rdd):
-    """
-    Xử lý mỗi batch RDD từ DStream.
-    """
     if rdd.isEmpty():
         print(f"{YELLOW}Received empty RDD batch{RESET}")
         return
@@ -59,7 +76,6 @@ def process_rdd(rdd):
             digital = int(parts[1])
             analog = float(parts[2])
 
-            # record log bình thường
             log_record = {
                 "sensor": sensor_id,
                 "digital": digital,
@@ -68,7 +84,6 @@ def process_rdd(rdd):
                 "timestamp": datetime.utcnow()
             }
 
-            # record alert nếu vượt ngưỡng
             alert_record = None
             if analog > 60:
                 alert_record = {
@@ -93,18 +108,12 @@ def process_rdd(rdd):
     alerts.foreachPartition(lambda it: save_partition(it, COL_ALERTS))
 
 
-# ========================
-# Main: Spark Streaming
-# ========================
 if __name__ == "__main__":
     sc = SparkContext("local[2]", "IoTStreamApp")
     sc.setLogLevel("ERROR")
     ssc = StreamingContext(sc, 2)
 
-    # Nhận dữ liệu từ socket
     lines = ssc.socketTextStream("localhost", 9998)
-
-    # Xử lý & lưu vào MongoDB
     lines.foreachRDD(process_rdd)
 
     print(f"{BLUE}Spark Streaming started, listening on localhost:9998{RESET}")
