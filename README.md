@@ -8,7 +8,6 @@ Nguồn dữ liệu được giả lập qua **socket server** (`socket_sensor.p
 
 # 📑 Mục lục
 
-- [🚀 Giới thiệu](#-giới-thiệu)
 - [📋 Cấu trúc Project](#-cấu-trúc-project)
 - [🔹 Yêu cầu](#-yêu-cầu)
 - [📥 Clone project](#-clone-project)
@@ -19,7 +18,6 @@ Nguồn dữ liệu được giả lập qua **socket server** (`socket_sensor.p
   - [📋 Mô tả tổng quan](#-mô-tả-tổng-quan)
   - [📡 Dữ liệu đầu vào](#-dữ-liệu-đầu-vào)
   - [🎯 Yêu cầu chức năng](#-yêu-cầu-chức-năng)
-  - [⚙️ Yêu cầu kỹ thuật](#️-yêu-cầu-kỹ-thuật)
   - [Cấu trúc dữ liệu output trong MongoDB](#cấu-trúc-dữ-liệu-output-trong-mongodb)
   - [Kết quả mong đợi](#kết-quả-mong-đợi)
   - [Truy vấn avg sau 1 phút](#truy-vấn-avg-sau-1-phút)
@@ -168,18 +166,6 @@ File `socket_sensor.py` sẽ gửi dữ liệu qua **port 9998** với format:
   - `100_gas_sensor_avg`: Windowed averages
 - Sử dụng `replace_one` với `upsert=True` để tránh duplicate
 
-## ⚙️ Yêu cầu kỹ thuật
-
-### Spark Streaming Configuration:
-- **Batch interval**: 2 giây
-- **Checkpoint**: `./checkpoint_100_sensors`
-- **Local mode**: `local[2]` (2 cores)
-- **Log level**: OFF (để giảm noise)
-
-### MongoDB Connection:
-- **URI**: `mongodb://mongo:27017` (default)
-- **Connection**: Tạo connection cho mỗi partition
-- **Error handling**: Handle connection errors gracefully
 
 ### Data Processing Pipeline:
 1. **Stream Input** → Parse text lines
