@@ -5,6 +5,27 @@
 Project này mô phỏng hệ thống IoT sử dụng **Apache Spark Streaming** để xử lý dữ liệu cảm biến theo thời gian thực.  
 Nguồn dữ liệu được giả lập qua **socket server** (`socket_sensor.py`) đọc từ file log, gửi từng dòng vào Spark Streaming (`main.py`) để xử lý, phân tích và lưu vào **MongoDB**.  
 
+
+# 📑 Mục lục
+
+- [🚀 Giới thiệu](#-giới-thiệu)
+- [📋 Cấu trúc Project](#-cấu-trúc-project)
+- [🔹 Yêu cầu](#-yêu-cầu)
+- [📥 Clone project](#-clone-project)
+- [🔹 Demo – Gas Sensor](#-demo--gas-sensor-cảm-biến-khí-gas)
+  - [Mô tả](#mô-tả)
+  - [Chạy thử](#chạy-thử)
+- [🔹 Bài tập IoT Gas Sensor Streaming với Spark và MongoDB](#-bài-tập-iot-gas-sensor-streaming-với-spark-và-mongodb)
+  - [📋 Mô tả tổng quan](#-mô-tả-tổng-quan)
+  - [📡 Dữ liệu đầu vào](#-dữ-liệu-đầu-vào)
+  - [🎯 Yêu cầu chức năng](#-yêu-cầu-chức-năng)
+  - [⚙️ Yêu cầu kỹ thuật](#️-yêu-cầu-kỹ-thuật)
+  - [Cấu trúc dữ liệu output trong MongoDB](#cấu-trúc-dữ-liệu-output-trong-mongodb)
+  - [Kết quả mong đợi](#kết-quả-mong-đợi)
+  - [Truy vấn avg sau 1 phút](#truy-vấn-avg-sau-1-phút)
+
+
+
 ## 📋 Cấu trúc Project
 
 ```
@@ -29,27 +50,20 @@ IoT-output-foreach-mongodb/
 
 ## 🔹 Yêu cầu
 
-- Git
-- Docker & Docker Compose
-- MongoDB Compass (tùy chọn để kiểm tra dữ liệu)  
-  > [Tải MongoDB Compass](https://downloads.mongodb.com/compass/mongodb-compass-1.46.10-win32-x64.exe)
-
-### Kết nối MongoDB Compass
-
-- **Host:** `mongodb://localhost:27017`
-- **Database mặc định:** `iotdb`
-
-![Mongo Compass Connect](https://github.com/user-attachments/assets/d2af6b60-eb15-4de5-b0b9-42f8a4ad64c5)
-
-![Mongo Compass Collections](https://github.com/user-attachments/assets/51feea76-2bcc-4825-b82a-d3c4a056de9f)
+* **Git** (clone project)
+* **Docker & Docker Compose** (chạy Spark + MongoDB qua `docker-compose.yml`)
+* **MongoDB Shell (`mongosh`)** hoặc **MongoDB Compass** (tùy chọn) để kiểm tra dữ liệu:
+  > MongoDB Compass: [Tải MongoDB Compass](https://downloads.mongodb.com/compass/mongodb-compass-1.46.10-win32-x64.exe)
 
 ---
+
 
 ## 📥 Clone project
 
 ```bash
 git clone https://github.com/duonghieu7104/IoT-output-foreach-mongodb.git
 cd IoT-output-foreach-mongodb
+docker-compose up -d
 ```
 
 ![Clone Project](https://github.com/user-attachments/assets/c7ffa86c-f826-454f-bbbe-2ca37957e293)
@@ -83,6 +97,11 @@ docker exec -it spark-master-v3 spark-submit /app/demo/main.py
 ![Spark Streaming](https://github.com/user-attachments/assets/5dfa3c88-339c-4e6c-8765-5be3dc4380d3)
 
 **Bước 3:** Kiểm tra trong MongoDB
+
+**Kết nối MongoDB Compass**
+
+- **Host:** `mongodb://localhost:27017`
+- **Database mặc định:** `iotdb`
 
 ![MongoDB Check](https://github.com/user-attachments/assets/d1aebd9f-f3af-4288-b80a-0619513d84ae)
 
