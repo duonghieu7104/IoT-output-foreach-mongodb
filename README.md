@@ -215,6 +215,10 @@ File `socket_sensor.py` sẽ gửi dữ liệu qua **port 9998** với format:
   "window": "60s"
 }
 ```
+```bash
+docker exec -it spark-master-v3 spark-submit /app/demo/socket_sensor.py
+docker exec -it spark-master-v3 spark-submit /app/demo/main.py
+```
 
 ### Kết quả mong đợi
 
@@ -228,6 +232,8 @@ File `socket_sensor.py` sẽ gửi dữ liệu qua **port 9998** với format:
 
 ### Truy vấn avg sau 1 phút
 #### Dùng MongoDB Shell
+
+
 ```bash
 docker exec -it mongo-v3 mongosh
 ```
