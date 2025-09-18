@@ -115,7 +115,7 @@ Sẽ có 2 collection: `0_gas_sensor_logs` và `0_gas_sensor_alerts`
 
 ---
 
-# 🔹 Bài tập IoT Gas Sensor Streaming với Spark và MongoDB
+# 🔹 Bài tập IoT Gas Sensor Streaming với Spark và MongoDB (hoàn thành code trong `ex`)
 
 ## 📋 Mô tả tổng quan
 Xây dựng hệ thống giám sát real-time cho 100 cảm biến khí gas sử dụng Apache Spark Streaming và MongoDB. Hệ thống cần có khả năng:
@@ -216,8 +216,8 @@ File `socket_sensor.py` sẽ gửi dữ liệu qua **port 9998** với format:
 }
 ```
 ```bash
-docker exec -it spark-master-v3 spark-submit /app/demo/socket_sensor.py
-docker exec -it spark-master-v3 spark-submit /app/demo/main.py
+docker exec -it spark-master-v3 spark-submit /app/ex/socket_sensor.py
+docker exec -it spark-master-v3 spark-submit /app/ex/main.py
 ```
 
 ### Kết quả mong đợi
